@@ -6,7 +6,8 @@
 #include <sys/syscall.h>
 
 #define TimerCreator(fileName)                                                 \
-  std::make_shared<Timer>(__FILE__, __func__, __LINE__, fileName);
+  std::make_shared<popart::profiler::Timer>(__FILE__, __func__, __LINE__, fileName);
+
 using std::chrono::milliseconds;
 using std::chrono::system_clock;
 class Timer {
