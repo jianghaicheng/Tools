@@ -1,9 +1,9 @@
 #include "oneapi/tbb/blocked_range.h"
 #include "oneapi/tbb/parallel_for.h"
 #include <oneapi/tbb/task_arena.h>
+#include <oneapi/tbb/concurrent_unordered_map.h>
 
-+#include <oneapi/tbb/concurrent_unordered_map.h>
-
+example:
  using CodeSizeSparseVec = tbb::concurrent_unordered_map<int, uint64_t>;
 std::vector<std::thread> allThreads;
 std::vector<std::shared_ptr<pva::Program>> allPrograms(programs().size());
@@ -19,7 +19,18 @@ oneapi::tbb::parallel_for(tbb::blocked_range<size_t>(0, allPrograms.size()),
    });
  });
 
+example:
+  auto cpu_kernel = [=, &lowered_vars] (const oneapi::tbb::blocked_range<size_t>& range) {
+    for (size_t i=range.begin(); i != range.end(); ++i) {
+      addVar(lowered_vars[i], i);
+    }
+  };
+  oneapi::tbb::global_control threads_control(oneapi::tbb::global_control::max_allowed_parallelism, THREADS_INDICES_BLOCK);
+  tbb::parallel_for(tbb::blocked_range<size_t>(0, lowered_vars.size()), cpu_kernel);
+  base_container_number_ += lowered_vars.size();
+}
 
+example:
     // Limit the number of threads to two for all oneTBB parallel interfaces
     oneapi::tbb::global_control global_limit(oneapi::tbb::global_control::max_allowed_parallelism, 2);
 
